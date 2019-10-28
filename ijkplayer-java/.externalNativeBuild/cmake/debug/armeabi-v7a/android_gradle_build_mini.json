@@ -1,0 +1,58 @@
+{
+  "buildFiles": [
+    "D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\src\\main\\jni\\CMakeLists.txt",
+    "D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\src\\main\\jni\\ijkj4a\\CMakeLists.txt",
+    "D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\src\\main\\jni\\ijkyuv\\CMakeLists.txt",
+    "D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\src\\main\\jni\\ijksdl\\CMakeLists.txt",
+    "D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\src\\main\\jni\\android-ndk-profiler-dummy\\CMakeLists.txt",
+    "D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\src\\main\\jni\\ijksoundtouch\\CMakeLists.txt",
+    "D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\src\\main\\jni\\ijkplayer\\CMakeLists.txt"
+  ],
+  "cleanCommands": [
+    "D:\\Android\\sdk\\cmake\\3.6.4111459\\bin\\cmake.exe --build D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\.externalNativeBuild\\cmake\\debug\\armeabi-v7a --target clean"
+  ],
+  "libraries": {
+    "cpufeatures-Debug-armeabi-v7a": {
+      "artifactName": "cpufeatures",
+      "buildCommand": "D:\\Android\\sdk\\cmake\\3.6.4111459\\bin\\cmake.exe --build D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\.externalNativeBuild\\cmake\\debug\\armeabi-v7a --target cpufeatures",
+      "abi": "armeabi-v7a",
+      "output": "D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\.externalNativeBuild\\cmake\\debug\\armeabi-v7a\\ijksdl\\libcpufeatures.a"
+    },
+    "ijksdl-Debug-armeabi-v7a": {
+      "artifactName": "ijksdl",
+      "buildCommand": "D:\\Android\\sdk\\cmake\\3.6.4111459\\bin\\cmake.exe --build D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\.externalNativeBuild\\cmake\\debug\\armeabi-v7a --target ijksdl",
+      "abi": "armeabi-v7a",
+      "output": "D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\build\\intermediates\\cmake\\debug\\obj\\armeabi-v7a\\libijksdl.so"
+    },
+    "ijkj4a-Debug-armeabi-v7a": {
+      "artifactName": "ijkj4a",
+      "buildCommand": "D:\\Android\\sdk\\cmake\\3.6.4111459\\bin\\cmake.exe --build D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\.externalNativeBuild\\cmake\\debug\\armeabi-v7a --target ijkj4a",
+      "abi": "armeabi-v7a",
+      "output": "D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\.externalNativeBuild\\cmake\\debug\\armeabi-v7a\\ijkj4a\\libijkj4a.a"
+    },
+    "ijkplayer-Debug-armeabi-v7a": {
+      "artifactName": "ijkplayer",
+      "buildCommand": "D:\\Android\\sdk\\cmake\\3.6.4111459\\bin\\cmake.exe --build D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\.externalNativeBuild\\cmake\\debug\\armeabi-v7a --target ijkplayer",
+      "abi": "armeabi-v7a",
+      "output": "D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\build\\intermediates\\cmake\\debug\\obj\\armeabi-v7a\\libijkplayer.so"
+    },
+    "yuv_static-Debug-armeabi-v7a": {
+      "artifactName": "yuv_static",
+      "buildCommand": "D:\\Android\\sdk\\cmake\\3.6.4111459\\bin\\cmake.exe --build D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\.externalNativeBuild\\cmake\\debug\\armeabi-v7a --target yuv_static",
+      "abi": "armeabi-v7a",
+      "output": "D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\.externalNativeBuild\\cmake\\debug\\armeabi-v7a\\ijkyuv\\libyuv_static.a"
+    },
+    "ijksoundtouch-Debug-armeabi-v7a": {
+      "artifactName": "ijksoundtouch",
+      "buildCommand": "D:\\Android\\sdk\\cmake\\3.6.4111459\\bin\\cmake.exe --build D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\.externalNativeBuild\\cmake\\debug\\armeabi-v7a --target ijksoundtouch",
+      "abi": "armeabi-v7a",
+      "output": "D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\.externalNativeBuild\\cmake\\debug\\armeabi-v7a\\ijksoundtouch\\libijksoundtouch.a"
+    },
+    "ndkprofiler-Debug-armeabi-v7a": {
+      "artifactName": "ndkprofiler",
+      "buildCommand": "D:\\Android\\sdk\\cmake\\3.6.4111459\\bin\\cmake.exe --build D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\.externalNativeBuild\\cmake\\debug\\armeabi-v7a --target ndkprofiler",
+      "abi": "armeabi-v7a",
+      "output": "D:\\workspace\\Android\\mijkplayer-master\\ijkplayer-java\\.externalNativeBuild\\cmake\\debug\\armeabi-v7a\\android-ndk-profiler-dummy\\libndkprofiler.a"
+    }
+  }
+}

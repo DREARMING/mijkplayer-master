@@ -1,0 +1,7 @@
+CMake Warning at D:/Android/sdk/ndk-bundle/build/cmake/android.toolchain.cmake:63 (message):
+  Using custom NDK path (ANDROID_NDK is set): D:\Android\sdk\ndk-bundle
+Call Stack (most recent call first):
+  D:/workspace/Android/mijkplayer-master/ijkplayer-java/.externalNativeBuild/cmake/release/armeabi-v7a/CMakeFiles/3.6.0-rc2/CMakeSystem.cmake:6 (include)
+  CMakeLists.txt
+
+
