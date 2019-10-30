@@ -3358,6 +3358,8 @@ static int read_thread(void *arg)
         is->max_cached_duration = 0;
     }
 
+    int64_t duration = 0;
+
     for (;;) {
         if (is->abort_request)
             break;
@@ -3612,11 +3614,24 @@ static int read_thread(void *arg)
         } else {
             av_packet_unref(pkt);
         }
-        av_log(NULL, AV_LOG_INFO, "max_cached_duration pkt queue size : %d", is->videoq.nb_packets);
+        if(ret >= 0){
+            if(duration == 0){
+                //初始化duration
+                duration = av_gettime_relative();
+            }
+            int64_t currentPos = av_gettime_relative() - duration;
+            AVRational time_base = ic->streams[pkt->stream_index]->time_base;
+            double pts = av_q2d(time_base) * pkt->pts;
+            double delay = currentPos / 1000 - pts * 1000;
+            if(pts > 0 && delay > 2000){
+
+            }
+            av_log(NULL, AV_LOG_INFO, "av_frame_rate: num :%d, den:%d, pos :%f, nb_pkts : %d,current pos: %f,delay : %f", time_base.num, time_base.den, pts, is->videoq.nb_packets,(double)currentPos / 1000000, delay);
+        }
 
         //把 pkt 放进队列之后，检测到当前 pkt 是关键帧，那么进行 max_cached_duration 检测
         if(is->max_cached_duration > 0 && ret >= 0 && (pkt->flags & AV_PKT_FLAG_KEY)){
-            av_log(NULL, AV_LOG_INFO,"check max_cached_duration");
+            av_log(NULL, AV_LOG_INFO,"check max_cached_duration，current pkt pts is : %d", pkt->pts);
             control_queue_duration(ffp, is);
         }
 

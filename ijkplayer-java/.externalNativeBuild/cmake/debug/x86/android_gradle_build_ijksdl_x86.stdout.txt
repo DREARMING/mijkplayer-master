@@ -1,1 +1,115 @@
-ninja: no work to do.
+[1/101] Building C object ijkj4a/CMakeFiles/ijkj4a.dir/j4a/class/android/media/AudioTrack.c.o
+[2/101] Building C object ijkj4a/CMakeFiles/ijkj4a.dir/j4a/class/android/os/Build.c.o
+[3/101] Building C object ijkj4a/CMakeFiles/ijkj4a.dir/j4a/class/java/nio/ByteBuffer.c.o
+[4/101] Building C object ijkj4a/CMakeFiles/ijkj4a.dir/j4a/class/java/nio/Buffer.c.o
+[5/101] Building C object ijkj4a/CMakeFiles/ijkj4a.dir/j4a/class/android/media/MediaFormat.c.o
+[6/101] Building C object ijkj4a/CMakeFiles/ijkj4a.dir/j4a/class/android/media/MediaCodec.c.o
+[7/101] Building C object ijkj4a/CMakeFiles/ijkj4a.dir/j4a/class/android/media/PlaybackParams.c.o
+[8/101] Building C object ijkj4a/CMakeFiles/ijkj4a.dir/j4a/class/android/os/Bundle.c.o
+[9/101] Building C object ijkj4a/CMakeFiles/ijkj4a.dir/j4a/class/java/util/ArrayList.c.o
+[10/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/compare.cc.o
+[11/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/compare_common.cc.o
+[12/101] Building C object ijkj4a/CMakeFiles/ijkj4a.dir/j4a/j4a_base.c.o
+[13/101] Building C object ijkj4a/CMakeFiles/ijkj4a.dir/j4a/j4a_allclasses.c.o
+[14/101] Building C object ijkj4a/CMakeFiles/ijkj4a.dir/j4au/class/android/media/AudioTrack.util.c.o
+[15/101] Building C object ijkj4a/CMakeFiles/ijkj4a.dir/j4a/class/tv/danmaku/ijk/media/player/IjkMediaPlayer.c.o
+[16/101] Building C object ijkj4a/CMakeFiles/ijkj4a.dir/j4a/class/tv/danmaku/ijk/media/player/misc/IAndroidIO.c.o
+[17/101] Building C object ijkj4a/CMakeFiles/ijkj4a.dir/j4au/class/java/nio/ByteBuffer.util.c.o
+[18/101] Building C object ijkj4a/CMakeFiles/ijkj4a.dir/j4a/class/tv/danmaku/ijk/media/player/misc/IMediaDataSource.c.o
+[19/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/convert_from.cc.o
+[20/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/compare_posix.cc.o
+[21/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/convert_to_i420.cc.o
+[22/101] Linking C static library ijkj4a\libijkj4a.a
+[23/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/convert_to_argb.cc.o
+[24/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/cpu_id.cc.o
+[25/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/compare_neon.cc.o
+[26/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/format_conversion.cc.o
+[27/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/compare_win.cc.o
+[28/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/convert_jpeg.cc.o
+[29/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/compare_neon64.cc.o
+[30/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/convert_argb.cc.o
+[31/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/convert.cc.o
+[32/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/convert_from_argb.cc.o
+[33/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/planar_functions.cc.o
+[34/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/rotate.cc.o
+[35/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/rotate_mips.cc.o
+[36/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/rotate_neon.cc.o
+[37/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/mjpeg_decoder.cc.o
+[38/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/rotate_argb.cc.o
+[39/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/rotate_neon64.cc.o
+[40/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/row_any.cc.o
+[41/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/row_common.cc.o
+[42/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/row_mips.cc.o
+[43/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/mjpeg_validate.cc.o
+[44/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/row_neon64.cc.o
+[45/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/row_neon.cc.o
+[46/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/row_posix.cc.o
+[47/101] Building C object ijksdl/CMakeFiles/cpufeatures.dir/D_/Android/sdk/ndk-bundle/sources/android/cpufeatures/cpu-features.c.o
+[48/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/scale_argb.cc.o
+[49/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/scale.cc.o
+[50/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/row_win.cc.o
+[51/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/video_common.cc.o
+[52/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/scale_common.cc.o
+[53/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/scale_mips.cc.o
+[54/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/scale_neon.cc.o
+[55/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/scale_neon64.cc.o
+[56/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/scale_posix.cc.o
+[57/101] Building CXX object ijkyuv/CMakeFiles/yuv_static.dir/source/scale_win.cc.o
+[58/101] Linking C static library ijksdl\libcpufeatures.a
+[59/101] Linking CXX static library ijkyuv\libyuv_static.a
+[60/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/android/ijksdl_aout_android_audiotrack.c.o
+[61/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/android/ijksdl_android_jni.c.o
+[62/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/android/ijksdl_aout_android_opensles.c.o
+[63/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/android/ijksdl_codec_android_mediacodec_java.c.o
+[64/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/dummy/ijksdl_vout_dummy.c.o
+[65/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/android/ijksdl_codec_android_mediaformat_java.c.o
+[66/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/android/ijksdl_codec_android_mediacodec.c.o
+[67/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/android/android_nativewindow.c.o
+[68/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/android/ijksdl_codec_android_mediaformat.c.o
+[69/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/android/ijksdl_codec_android_mediacodec_dummy.c.o
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijksdl\android\ijksdl_codec_android_mediacodec_java.c:207:50: warning: comparison of unsigned expression < 0 is always false [-Wtautological-compare]
+    if (J4A_ExceptionCheck__catchAll(env) || idx < 0 || idx >= buffer_count) {
+                                             ~~~ ^ ~
+1 warning generated.
+[70/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/android/android_audiotrack.c.o
+[71/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/android/ijksdl_codec_android_mediadef.c.o
+[72/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/android/ijksdl_codec_android_mediacodec_internal.c.o
+[73/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/android/ijksdl_vout_android_nativewindow.c.o
+[74/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/android/ijksdl_vout_android_surface.c.o
+[75/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/android/ijksdl_vout_overlay_android_mediacodec.c.o
+[76/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/gles2/common.c.o
+[77/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/gles2/fsh/rgb.fsh.c.o
+[78/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/ffmpeg/abi_all/image_convert.c.o
+[79/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/ffmpeg/ijksdl_vout_overlay_ffmpeg.c.o
+[80/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/gles2/color.c.o
+[81/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/ijksdl_thread.c.o
+[82/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/ijksdl_timer.c.o
+[83/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/ijksdl_vout.c.o
+[84/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/gles2/renderer_yuv420p.c.o
+[85/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/gles2/renderer.c.o
+[86/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/gles2/shader.c.o
+[87/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/ijksdl_aout.c.o
+[88/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/gles2/renderer_yuv444p10le.c.o
+[89/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/gles2/fsh/yuv420sp.fsh.c.o
+[90/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/gles2/fsh/yuv444p10le.fsh.c.o
+[91/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/gles2/vsh/mvp.vsh.c.o
+[92/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/ijksdl_egl.c.o
+[93/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/ijksdl_extra_log.c.o
+[94/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/ijksdl_error.c.o
+[95/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/gles2/fsh/yuv420p.fsh.c.o
+[96/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/gles2/renderer_yuv420sp.c.o
+[97/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/gles2/renderer_rgb.c.o
+[98/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/ijksdl_audio.c.o
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijksdl\ijksdl_egl.c:107:22: warning: implicit declaration of function 'ANativeWindow_getFormat' is invalid in C99 [-Wimplicit-function-declaration]
+        int format = ANativeWindow_getFormat(egl->window);
+                     ^
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijksdl\ijksdl_egl.c:111:19: warning: implicit declaration of function 'ANativeWindow_setBuffersGeometry' is invalid in C99 [-Wimplicit-function-declaration]
+        int ret = ANativeWindow_setBuffersGeometry(egl->window, width, height, format);
+                  ^
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijksdl\ijksdl_egl.c:196:26: warning: implicit declaration of function 'ANativeWindow_getWidth' is invalid in C99 [-Wimplicit-function-declaration]
+        int32_t width  = ANativeWindow_getWidth(window);
+                         ^
+3 warnings generated.
+[99/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/ijksdl_mutex.c.o
+[100/101] Building C object ijksdl/CMakeFiles/ijksdl.dir/ijksdl_stdinc.c.o
+[101/101] Linking CXX shared library D:\workspace\Android\mijkplayer-master\ijkplayer-java\build\intermediates\cmake\debug\obj\x86\libijksdl.so

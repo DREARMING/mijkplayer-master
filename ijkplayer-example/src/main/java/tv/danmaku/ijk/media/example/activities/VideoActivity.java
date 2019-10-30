@@ -180,6 +180,13 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         return true;
     }
 
+    private void seek(){
+        if(mVideoView.isPlaying()) {
+            Log.d(TAG, "seek to 0");
+
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -190,10 +197,11 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
             mMediaController.showOnce(mToastTextView);
             return true;
         } else if (id == R.id.action_toggle_player) {
-            int player = mVideoView.togglePlayer();
+            /*int player = mVideoView.togglePlayer();
             String playerText = IjkVideoView.getPlayerText(this, player);
             mToastTextView.setText(playerText);
-            mMediaController.showOnce(mToastTextView);
+            mMediaController.showOnce(mToastTextView);*/
+            seek();
             return true;
         } else if (id == R.id.action_toggle_render) {
             int render = mVideoView.toggleRender();

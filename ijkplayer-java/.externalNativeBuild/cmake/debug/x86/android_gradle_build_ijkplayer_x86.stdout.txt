@@ -1,1 +1,152 @@
-ninja: no work to do.
+[1/53] Building CXX object ijksoundtouch/CMakeFiles/ijksoundtouch.dir/source/SoundTouch/InterpolateCubic.cpp.o
+[2/53] Building CXX object ijksoundtouch/CMakeFiles/ijksoundtouch.dir/source/SoundTouch/PeakFinder.cpp.o
+[3/53] Building CXX object ijksoundtouch/CMakeFiles/ijksoundtouch.dir/source/SoundTouch/InterpolateLinear.cpp.o
+[4/53] Building CXX object ijksoundtouch/CMakeFiles/ijksoundtouch.dir/source/SoundTouch/sse_optimized.cpp.o
+[5/53] Building CXX object ijksoundtouch/CMakeFiles/ijksoundtouch.dir/source/SoundTouch/mmx_optimized.cpp.o
+[6/53] Building CXX object ijksoundtouch/CMakeFiles/ijksoundtouch.dir/source/SoundTouch/RateTransposer.cpp.o
+[7/53] Building CXX object ijksoundtouch/CMakeFiles/ijksoundtouch.dir/source/SoundTouch/TDStretch.cpp.o
+[8/53] Building CXX object ijksoundtouch/CMakeFiles/ijksoundtouch.dir/source/SoundTouch/AAFilter.cpp.o
+[9/53] Building CXX object ijksoundtouch/CMakeFiles/ijksoundtouch.dir/source/SoundTouch/BPMDetect.cpp.o
+[10/53] Building CXX object ijksoundtouch/CMakeFiles/ijksoundtouch.dir/source/SoundTouch/FIFOSampleBuffer.cpp.o
+[11/53] Building CXX object ijksoundtouch/CMakeFiles/ijksoundtouch.dir/source/SoundTouch/InterpolateShannon.cpp.o
+[12/53] Building CXX object ijksoundtouch/CMakeFiles/ijksoundtouch.dir/source/SoundTouch/FIRFilter.cpp.o
+[13/53] Building CXX object ijksoundtouch/CMakeFiles/ijksoundtouch.dir/source/SoundTouch/cpu_detect_x86.cpp.o
+[14/53] Building C object android-ndk-profiler-dummy/CMakeFiles/ndkprofiler.dir/prof.c.o
+[15/53] Building CXX object ijksoundtouch/CMakeFiles/ijksoundtouch.dir/source/SoundTouch/SoundTouch.cpp.o
+[16/53] Building CXX object ijksoundtouch/CMakeFiles/ijksoundtouch.dir/ijksoundtouch_wrap.cpp.o
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijksoundtouch\source\SoundTouch\TDStretch.cpp:66:13: warning: unused variable '_scanOffsets' [-Wunused-const-variable]
+const short _scanOffsets[5][24]={
+            ^
+1 warning generated.
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijksoundtouch\source\SoundTouch\cpu_detect_x86.cpp:56:12: warning: 'bit_MMX' macro redefined [-Wmacro-redefined]
+   #define bit_MMX     (1 << 23)
+           ^
+D:\Android\sdk\ndk-bundle\toolchains\llvm\prebuilt\windows-x86_64\lib64\clang\5.0.300080\include\cpuid.h:140:9: note: previous definition is here
+#define bit_MMX         0x00800000
+        ^
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijksoundtouch\source\SoundTouch\cpu_detect_x86.cpp:57:12: warning: 'bit_SSE' macro redefined [-Wmacro-redefined]
+   #define bit_SSE     (1 << 25)
+           ^
+D:\Android\sdk\ndk-bundle\toolchains\llvm\prebuilt\windows-x86_64\lib64\clang\5.0.300080\include\cpuid.h:143:9: note: previous definition is here
+#define bit_SSE         0x02000000
+        ^
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijksoundtouch\source\SoundTouch\cpu_detect_x86.cpp:58:12: warning: 'bit_SSE2' macro redefined [-Wmacro-redefined]
+   #define bit_SSE2    (1 << 26)
+           ^
+D:\Android\sdk\ndk-bundle\toolchains\llvm\prebuilt\windows-x86_64\lib64\clang\5.0.300080\include\cpuid.h:144:9: note: previous definition is here
+#define bit_SSE2        0x04000000
+        ^
+3 warnings generated.
+[17/53] Linking C static library android-ndk-profiler-dummy\libndkprofiler.a
+[18/53] Linking CXX static library ijksoundtouch\libijksoundtouch.a
+[19/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavformat/allformats.c.o
+[20/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/android/pipeline/ffpipeline_android.c.o
+[21/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ff_ffpipeline.c.o
+[22/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ff_ffpipenode.c.o
+[23/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ff_cmdutils.c.o
+[24/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/android/pipeline/ffpipenode_android_mediacodec_vdec.c.o
+[25/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ff_ffplay.c.o
+[26/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/android/ffmpeg_api_jni.c.o
+[27/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/android/ijkplayer_jni.c.o
+[28/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/android/ijkplayer_android.c.o
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\android\pipeline\ffpipeline_android.c:109:31: warning: incompatible pointer to integer conversion initializing 'int' with an expression of type 'void *' [-Wint-conversion]
+    int                       ret = NULL;
+                              ^     ~~~~
+1 warning generated.
+[29/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavformat/ijkioprotocol.c.o
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\android\pipeline\ffpipenode_android_mediacodec_vdec.c:509:9: warning: 'av_packet_split_side_data' is deprecated [-Wdeprecated-declarations]
+        av_packet_split_side_data(&pkt);
+        ^
+D:/workspace/Android/mijkplayer-master/ijkplayer-java/src/main/jni/ffmpeg/x86/include\libavcodec/avcodec.h:4706:1: note: 'av_packet_split_side_data' has been explicitly marked deprecated here
+attribute_deprecated
+^
+D:/workspace/Android/mijkplayer-master/ijkplayer-java/src/main/jni/ffmpeg/x86/include\libavutil/attributes.h:94:49: note: expanded from macro 'attribute_deprecated'
+#    define attribute_deprecated __attribute__((deprecated))
+                                                ^
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\android\pipeline\ffpipenode_android_mediacodec_vdec.c:550:30: warning: 'avcodec_decode_video2' is deprecated [-Wdeprecated-declarations]
+                change_ret = avcodec_decode_video2(new_avctx, frame, &got_picture, avpkt);
+                             ^
+D:/workspace/Android/mijkplayer-master/ijkplayer-java/src/main/jni/ffmpeg/x86/include\libavcodec/avcodec.h:4993:1: note: 'avcodec_decode_video2' has been explicitly marked deprecated here
+attribute_deprecated
+^
+D:/workspace/Android/mijkplayer-master/ijkplayer-java/src/main/jni/ffmpeg/x86/include\libavutil/attributes.h:94:49: note: expanded from macro 'attribute_deprecated'
+#    define attribute_deprecated __attribute__((deprecated))
+                                                ^
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\android\pipeline\ffpipenode_android_mediacodec_vdec.c:757:9: warning: 'av_packet_split_side_data' is deprecated [-Wdeprecated-declarations]
+        av_packet_split_side_data(&pkt);
+        ^
+D:/workspace/Android/mijkplayer-master/ijkplayer-java/src/main/jni/ffmpeg/x86/include\libavcodec/avcodec.h:4706:1: note: 'av_packet_split_side_data' has been explicitly marked deprecated here
+attribute_deprecated
+^
+D:/workspace/Android/mijkplayer-master/ijkplayer-java/src/main/jni/ffmpeg/x86/include\libavutil/attributes.h:94:49: note: expanded from macro 'attribute_deprecated'
+#    define attribute_deprecated __attribute__((deprecated))
+                                                ^
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\android\pipeline\ffpipenode_android_mediacodec_vdec.c:797:30: warning: 'avcodec_decode_video2' is deprecated [-Wdeprecated-declarations]
+                change_ret = avcodec_decode_video2(new_avctx, frame, &got_picture, avpkt);
+                             ^
+D:/workspace/Android/mijkplayer-master/ijkplayer-java/src/main/jni/ffmpeg/x86/include\libavcodec/avcodec.h:4993:1: note: 'avcodec_decode_video2' has been explicitly marked deprecated here
+attribute_deprecated
+^
+D:/workspace/Android/mijkplayer-master/ijkplayer-java/src/main/jni/ffmpeg/x86/include\libavutil/attributes.h:94:49: note: expanded from macro 'attribute_deprecated'
+#    define attribute_deprecated __attribute__((deprecated))
+                                                ^
+4 warnings generated.
+[30/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavformat/ijkurlhook.c.o
+[31/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavformat/ijklongurl.c.o
+[32/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavutil/ijkthreadpool.c.o
+[33/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavformat/ijkmediadatasource.c.o
+[34/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavutil/ijktree.c.o
+[35/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavformat/ijkiocache.c.o
+[36/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavformat/ijkiomanager.c.o
+[37/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavutil/ijkdict.c.o
+[38/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavformat/ijklivehook.c.o
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\ff_ffplay.c:526:11: warning: 'avcodec_encode_video2' is deprecated [-Wdeprecated-declarations]
+    ret = avcodec_encode_video2(img_info->frame_img_codec_ctx, &avpkt, dst_frame, &got_packet);
+          ^
+D:/workspace/Android/mijkplayer-master/ijkplayer-java/src/main/jni/ffmpeg/x86/include\libavcodec/avcodec.h:5508:1: note: 'avcodec_encode_video2' has been explicitly marked deprecated here
+attribute_deprecated
+^
+D:/workspace/Android/mijkplayer-master/ijkplayer-java/src/main/jni/ffmpeg/x86/include\libavutil/attributes.h:94:49: note: expanded from macro 'attribute_deprecated'
+#    define attribute_deprecated __attribute__((deprecated))
+                                                ^
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\ff_ffplay.c:1116:10: warning: implicit declaration of function 'isnanf' is invalid in C99 [-Wimplicit-function-declaration]
+    if (!isnan(slave_clock) && (isnan(clock) || fabs(clock - slave_clock) > AV_NOSYNC_THRESHOLD))
+         ^
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\ff_ffplay.c:95:41: note: expanded from macro 'isnan'
+#define isnan(x) (isnan((double)(x)) || isnanf((float)(x)))
+                                        ^
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\ff_ffplay.c:3622:93: warning: format specifies type 'int' but the argument has type 'int64_t' (aka 'long long') [-Wformat]
+            av_log(NULL, AV_LOG_INFO,"check max_cached_duration<U+FF0C>current pkt pts is : %d", pkt->pts);
+                                                                                            ~~   ^~~~~~~~
+                                                                                            %lld
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\ff_ffplay.c:3688:9: warning: 'av_free_packet' is deprecated [-Wdeprecated-declarations]
+        av_free_packet(&pkt1->pkt);
+        ^
+D:/workspace/Android/mijkplayer-master/ijkplayer-java/src/main/jni/ffmpeg/x86/include\libavcodec/avcodec.h:4650:1: note: 'av_free_packet' has been explicitly marked deprecated here
+attribute_deprecated
+^
+D:/workspace/Android/mijkplayer-master/ijkplayer-java/src/main/jni/ffmpeg/x86/include\libavutil/attributes.h:94:49: note: expanded from macro 'attribute_deprecated'
+#    define attribute_deprecated __attribute__((deprecated))
+                                                ^
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\ff_ffplay.c:3719:21: warning: format specifies type 'int' but the argument has type 'int64_t' (aka 'long long') [-Wformat]
+                    duration,av_q2d(is->video_st->time_base),is->video_st->time_base.den, is->video_st->time_base.num, cached_duration);
+                    ^~~~~~~~
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\ff_ffplay.c:3719:120: warning: format specifies type 'int' but the argument has type 'int64_t' (aka 'long long') [-Wformat]
+                    duration,av_q2d(is->video_st->time_base),is->video_st->time_base.den, is->video_st->time_base.num, cached_duration);
+                                                                                                                       ^~~~~~~~~~~~~~~
+6 warnings generated.
+[39/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavformat/ijkasync.c.o
+[40/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavformat/ijkio.c.o
+[41/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavformat/ijksegment.c.o
+[42/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavutil/ijkfifo.c.o
+[43/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavformat/ijkioapplication.c.o
+[44/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavformat/ijkioandroidio.c.o
+[45/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavformat/ijkioffio.c.o
+[46/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavformat/ijkiourlhook.c.o
+[47/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavutil/ijkutils.c.o
+[48/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/pipeline/ffpipeline_ffplay.c.o
+[49/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkplayer.c.o
+[50/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/pipeline/ffpipenode_ffplay_vdec.c.o
+[51/53] Building C object ijkplayer/CMakeFiles/ijkplayer.dir/ijkmeta.c.o
+[52/53] Building CXX object ijkplayer/CMakeFiles/ijkplayer.dir/ijkavutil/ijkstl.cpp.o
+[53/53] Linking CXX shared library D:\workspace\Android\mijkplayer-master\ijkplayer-java\build\intermediates\cmake\debug\obj\x86\libijkplayer.so

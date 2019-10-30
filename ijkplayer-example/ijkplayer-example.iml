@@ -150,9 +150,5 @@
     <orderEntry type="library" name="Gradle: com.android.support:swiperefreshlayout:28.0.0@aar" level="project" />
     <orderEntry type="module" module-name="ijkplayer-java" />
     <orderEntry type="module" module-name="ijkplayer-exo" />
-    <orderEntry type="module" module-name="ijkplayer-java" />
-    <orderEntry type="module" module-name="ijkplayer-exo" />
-    <orderEntry type="module" module-name="ijkplayer-java" />
-    <orderEntry type="module" module-name="ijkplayer-exo" />
   </component>
 </module>
