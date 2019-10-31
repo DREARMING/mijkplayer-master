@@ -1335,11 +1335,13 @@ retry:
             lastvp = frame_queue_peek_last(&is->pictq);
             vp = frame_queue_peek(&is->pictq);
 
+            //一般seek之后，serial都会不一样，这里为了避免播放seek之前残留的帧，这里直接播下一帧
             if (vp->serial != is->videoq.serial) {
                 frame_queue_next(&is->pictq);
                 goto retry;
             }
 
+            //seek完之后第一帧，这里记录 timber 为当前时间
             if (lastvp->serial != vp->serial)
                 is->frame_timer = av_gettime_relative() / 1000000.0;
 
@@ -3210,6 +3212,8 @@ static int read_thread(void *arg)
 
     is->realtime = is_realtime(ic);
 
+    av_log(NULL, AV_LOG_INFO, "realtime : %d",is->realtime);
+
     av_dump_format(ic, 0, is->filename, 0);
 
     int video_stream_count = 0;
@@ -3273,6 +3277,7 @@ static int read_thread(void *arg)
     if (st_index[AVMEDIA_TYPE_AUDIO] >= 0) {
         stream_component_open(ffp, st_index[AVMEDIA_TYPE_AUDIO]);
     } else {
+        //音频不存在的时候，设置主时钟为视频时钟
         ffp->av_sync_type = AV_SYNC_VIDEO_MASTER;
         is->av_sync_type  = ffp->av_sync_type;
     }
@@ -3318,8 +3323,10 @@ static int read_thread(void *arg)
         assert("invalid streams");
     }
 
-    if (ffp->infinite_buffer < 0 && is->realtime)
+    if (ffp->infinite_buffer < 1 && is->realtime)
         ffp->infinite_buffer = 1;
+
+    av_log(NULL, AV_LOG_INFO, "infinite_buffer : %d", ffp->infinite_buffer);
 
     if (!ffp->render_wait_start && !ffp->start_on_prepared)
         toggle_pause(ffp, 1);
@@ -3359,8 +3366,11 @@ static int read_thread(void *arg)
     }
 
     int64_t duration = 0;
-
+    long last_call_time = (long) av_gettime_relative();
     for (;;) {
+        long currentTime = (long) av_gettime_relative();
+        av_log(NULL, AV_LOG_INFO, "a loop waste time : %f", (currentTime - last_call_time) / (double)1000);
+        last_call_time = currentTime;
         if (is->abort_request)
             break;
 #ifdef FFP_MERGE
@@ -3486,6 +3496,7 @@ static int read_thread(void *arg)
             if (!is->eof) {
                 ffp_toggle_buffering(ffp, 0);
             }
+            av_log(NULL, AV_LOG_INFO, "infinite_buffer, should wait 10 ms");
             /* wait 10 ms */
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
@@ -3529,7 +3540,9 @@ static int read_thread(void *arg)
             }
         }
         pkt->flags = 0;
+        long read_frame_start_time = (long) av_gettime_relative();
         ret = av_read_frame(ic, pkt);
+        av_log(NULL, AV_LOG_INFO, "read_frame waste : %f", ((long)av_gettime_relative() - read_frame_start_time)/(double) 1000);
         if (ret < 0) {
             int pb_eof = 0;
             int pb_error = 0;
@@ -3626,13 +3639,14 @@ static int read_thread(void *arg)
             if(pts > 0 && delay > 2000){
 
             }
-            av_log(NULL, AV_LOG_INFO, "av_frame_rate: num :%d, den:%d, pos :%f, nb_pkts : %d,current pos: %f,delay : %f", time_base.num, time_base.den, pts, is->videoq.nb_packets,(double)currentPos / 1000000, delay);
+            av_log(NULL, AV_LOG_INFO, "av_frame_rate: num :%d, den:%d, pos :%f, nb_pkts : %d,current pos: %f,delay : %f, vq size :%d, aq size:%d",
+                    time_base.num, time_base.den, pts, is->videoq.nb_packets,(double)currentPos / 1000000, delay,
+                    frame_queue_nb_remaining(&is->pictq), frame_queue_nb_remaining(&is->sampq));
         }
 
         //把 pkt 放进队列之后，检测到当前 pkt 是关键帧，那么进行 max_cached_duration 检测
         if(is->max_cached_duration > 0 && ret >= 0 && (pkt->flags & AV_PKT_FLAG_KEY)){
-            av_log(NULL, AV_LOG_INFO,"check max_cached_duration，current pkt pts is : %d", pkt->pts);
-            control_queue_duration(ffp, is);
+            //control_queue_duration(ffp, is);
         }
 
         ffp_statistic_l(ffp);
@@ -3644,6 +3658,7 @@ static int read_thread(void *arg)
         }
 
         if (ffp->packet_buffering) {
+            av_log(NULL, AV_LOG_DEBUG, "packet_buffering : true");
             io_tick_counter = SDL_GetTickHR();
             if ((!ffp->first_video_frame_rendered && is->video_st) || (!ffp->first_audio_frame_rendered && is->audio_st)) {
                 if (abs((int)(io_tick_counter - prev_io_tick_counter)) > FAST_BUFFERING_CHECK_PER_MILLISECONDS) {

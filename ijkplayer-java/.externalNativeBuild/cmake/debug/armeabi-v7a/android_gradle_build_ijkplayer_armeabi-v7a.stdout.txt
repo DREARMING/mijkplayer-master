@@ -14,11 +14,7 @@ D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\ff_
 D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\ff_ffplay.c:95:41: note: expanded from macro 'isnan'
 #define isnan(x) (isnan((double)(x)) || isnanf((float)(x)))
                                         ^
-D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\ff_ffplay.c:3634:93: warning: format specifies type 'int' but the argument has type 'int64_t' (aka 'long long') [-Wformat]
-            av_log(NULL, AV_LOG_INFO,"check max_cached_duration<U+FF0C>current pkt pts is : %d", pkt->pts);
-                                                                                            ~~   ^~~~~~~~
-                                                                                            %lld
-D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\ff_ffplay.c:3700:9: warning: 'av_free_packet' is deprecated [-Wdeprecated-declarations]
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\ff_ffplay.c:3716:9: warning: 'av_free_packet' is deprecated [-Wdeprecated-declarations]
         av_free_packet(&pkt1->pkt);
         ^
 D:/workspace/Android/mijkplayer-master/ijkplayer-java/src/main/jni/ffmpeg/armeabi-v7a/include\libavcodec/avcodec.h:4650:1: note: 'av_free_packet' has been explicitly marked deprecated here
@@ -27,11 +23,11 @@ attribute_deprecated
 D:/workspace/Android/mijkplayer-master/ijkplayer-java/src/main/jni/ffmpeg/armeabi-v7a/include\libavutil/attributes.h:94:49: note: expanded from macro 'attribute_deprecated'
 #    define attribute_deprecated __attribute__((deprecated))
                                                 ^
-D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\ff_ffplay.c:3731:21: warning: format specifies type 'int' but the argument has type 'int64_t' (aka 'long long') [-Wformat]
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\ff_ffplay.c:3747:21: warning: format specifies type 'int' but the argument has type 'int64_t' (aka 'long long') [-Wformat]
                     duration,av_q2d(is->video_st->time_base),is->video_st->time_base.den, is->video_st->time_base.num, cached_duration);
                     ^~~~~~~~
-D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\ff_ffplay.c:3731:120: warning: format specifies type 'int' but the argument has type 'int64_t' (aka 'long long') [-Wformat]
+D:\workspace\Android\mijkplayer-master\ijkplayer-java\src\main\jni\ijkplayer\ff_ffplay.c:3747:120: warning: format specifies type 'int' but the argument has type 'int64_t' (aka 'long long') [-Wformat]
                     duration,av_q2d(is->video_st->time_base),is->video_st->time_base.den, is->video_st->time_base.num, cached_duration);
                                                                                                                        ^~~~~~~~~~~~~~~
-6 warnings generated.
+5 warnings generated.
 [2/2] Linking CXX shared library D:\workspace\Android\mijkplayer-master\ijkplayer-java\build\intermediates\cmake\debug\obj\armeabi-v7a\libijkplayer.so
