@@ -534,9 +534,23 @@ typedef struct FFDemuxCacheControl
     int max_buffer_size;
     int high_water_mark_in_bytes;
 
+    /**
+     * 第一次 需要 Buffer first_high_water_mark_in_ms duration的Frame
+     */
     int first_high_water_mark_in_ms;
+    /**
+     * 除了第一次之后，这里就是每次会叠加，为什么会叠加的原因在于，既然触发了 buffer，肯定是因为网络不好，如果每次都缓存如此短暂的时间的话，是不合理的，总是在buffer，
+     * 所以这里就会延长buffer的时间，但是不会超过 last_high_water_mark_in_ms
+     */
     int next_high_water_mark_in_ms;
+
+    /**
+     * buffer 缓存最长的时间
+     */
     int last_high_water_mark_in_ms;
+    /**
+     * 当前缓存buffer的时间
+     */
     int current_high_water_mark_in_ms;
 } FFDemuxCacheControl;
 
