@@ -1156,9 +1156,22 @@ static double get_master_clock(VideoState *is)
     return val;
 }
 
+/**
+ * 在外部时钟作为主时钟的时候，对于 video_refresh 函数中的 check_external_clock_speed(is) 方法，内部对 pkt_queue 缓存的pkt数量去调节外部时钟的速度。
+ * 这样点播的时候比较有用，可以有效缓解短暂的网络抖动带来的影响，可以让视频更加平滑。
+ *
+ * 但是如果在直播的话，如果以外部时钟作为主时钟，在网络抖动时，因为一开始网络不好，导致外部时钟速度调慢了，
+ * 当网络恢复之后，因为这时候视频时钟已经超过了外部时钟，因为外部时钟变慢了，所以会delay>0, time-frame_timber > 100ms，
+ * 导致frame_timber 被更新，这样就会被强制同步为当前时间，网络变好之后获取的pkt，很多是过时的，从而导致了累积延迟。
+ *
+ * 不过该算法外部时钟有个比较好的点就是，当pkt_queue的pkt数量大于10，那么就会加快外部时钟，因为它认为播放太慢了，有利于直播的时候，追上延迟。
+ *
+ * @param is
+ */
 static void check_external_clock_speed(VideoState *is) {
    if ((is->video_stream >= 0 && is->videoq.nb_packets <= EXTERNAL_CLOCK_MIN_FRAMES) ||
        (is->audio_stream >= 0 && is->audioq.nb_packets <= EXTERNAL_CLOCK_MIN_FRAMES)) {
+       if(is->low_delay > 0) return;
        set_clock_speed(&is->extclk, FFMAX(EXTERNAL_CLOCK_SPEED_MIN, is->extclk.speed - EXTERNAL_CLOCK_SPEED_STEP));
    } else if ((is->video_stream < 0 || is->videoq.nb_packets > EXTERNAL_CLOCK_MAX_FRAMES) &&
               (is->audio_stream < 0 || is->audioq.nb_packets > EXTERNAL_CLOCK_MAX_FRAMES)) {
@@ -1203,7 +1216,7 @@ static void stream_toggle_pause_l(FFPlayer *ffp, int pause_on)
     } else {
     }
     set_clock(&is->extclk, get_clock(&is->extclk), is->extclk.serial);
-    if (is->step && (is->pause_req || is->buffering_on)) {
+    if (is->step && (is->pause_req || is->buffering_on || is->self_dropping_frame)) {
         is->paused = is->vidclk.paused = is->extclk.paused = pause_on;
     } else {
         is->paused = is->audclk.paused = is->vidclk.paused = is->extclk.paused = pause_on;
@@ -1214,7 +1227,7 @@ static void stream_toggle_pause_l(FFPlayer *ffp, int pause_on)
 static void stream_update_pause_l(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
-    if (!is->step && (is->pause_req || is->buffering_on)) {
+    if (!is->step && (is->pause_req || is->buffering_on || is->self_dropping_frame)) {
         stream_toggle_pause_l(ffp, 1);
     } else {
         stream_toggle_pause_l(ffp, 0);
@@ -1317,6 +1330,12 @@ static void video_refresh(FFPlayer *opaque, double *remaining_time)
 
     Frame *sp, *sp2;
 
+    /**
+     * 如果以外部时钟作为参考时钟，这里将会根据 pkt_queue 的pkt数量，动态调节时钟的速度。
+     * 如果 pkt 数据包过多，那么就调快外部时钟的速度，尽快消耗pkt，这对于网络抖动之后，追上外部时钟的措施
+     *
+     * 如果pkt 数量过少，那么就减慢外部时钟的速度，让 pkt_queue 缓存足够多的数据，避免卡顿。
+     */
     if (!is->paused && get_master_sync_type(is) == AV_SYNC_EXTERNAL_CLOCK && is->realtime)
         check_external_clock_speed(is);
 
@@ -1348,8 +1367,9 @@ retry:
             }
 
             //seek完之后第一帧，这里记录 timber 为当前时间
-            if (lastvp->serial != vp->serial)
+            if (lastvp->serial != vp->serial){
                 is->frame_timer = av_gettime_relative() / 1000000.0;
+            }
 
             //暂停的话，显示上一帧，不播下一帧
             if (is->paused)
@@ -1375,9 +1395,14 @@ retry:
 
             //在主时钟是Video的时候，卡顿的情况导致前后两帧跟不上 frame_timber,超过 100 ms,设置 timber 为当前时间。这就会导致忽略了上一次卡顿了。
             //这里就是累积延迟产生的原因之一
-            //如果是外部时钟，网络抖动之后的pkt落差大于100ms，那么这里的delay应该是0
-            if (delay > 0 && time - is->frame_timer > AV_SYNC_THRESHOLD_MAX)
+            //如果是外部时钟作为主时钟，网络抖动之后的pkt落差大于100ms，那么这里的delay应该是0
+            //注意，如果是暂停的话，那么音视频时钟将会在暂停完毕之后，更新到最后一帧pts的偏移量，因此不会有外部时钟远远大于音视频时钟的说法。
+            //如果是音频时钟作为主时钟，暂停的话，下面条件应该为true，更新frame_timber，那么不会乱丢帧。如果网络抖动的话，因为视频时追音频的，不会有什么影响。累积延迟
+            //还是要看音频的延迟。
+            if (delay > 0 && time - is->frame_timer > AV_SYNC_THRESHOLD_MAX){
                 is->frame_timer = time;
+                av_log(NULL, AV_LOG_INFO, "delay : %f sync timber", delay);
+            }
 
             SDL_LockMutex(is->pictq.mutex);
             if (!isnan(vp->pts))
@@ -2698,6 +2723,8 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
            }
            is->audio_buf_index = 0;
         }
+
+        //serial 不相等，过期了，需要flush。
         if (is->auddec.pkt_serial != is->audioq.serial) {
             is->audio_buf_index = is->audio_buf_size;
             memset(stream, 0, len);
@@ -2724,6 +2751,7 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
     is->audio_write_buf_size = is->audio_buf_size - is->audio_buf_index;
     /* Let's assume the audio driver that is used by SDL has two periods. */
     if (!isnan(is->audio_clock)) {
+
         set_clock_at(&is->audclk, is->audio_clock - (double)(is->audio_write_buf_size) / is->audio_tgt.bytes_per_sec - SDL_AoutGetLatencySeconds(ffp->aout), is->audio_clock_serial, ffp->audio_callback_time / 1000000.0);
         sync_clock_to_slave(&is->extclk, &is->audclk);
     }
@@ -3285,10 +3313,26 @@ static int read_thread(void *arg)
     //判断是否是 实时流协议
     is->realtime = is_realtime(ic);
 
+    if(!is->realtime && av_stristart(is->filename, "rtmp", NULL)){
+        is->realtime = 1;
+    }
+
     av_log(NULL, AV_LOG_INFO, "realtime : %d",is->realtime);
 
     //打印视频文件的 MetaData
     av_dump_format(ic, 0, is->filename, 0);
+
+    //low_delay option 初始化, 只有是直播时，该选项才能生效。
+    AVDictionaryEntry *low_delay_entry = av_dict_get(ffp->player_opts, "low_delay", NULL, 0);
+    if(is->realtime && low_delay_entry){
+        int low_delay = atoi(low_delay_entry->value);
+        if(low_delay){
+            is->low_delay = 1;
+            //低延迟模式不能用 packet_buffering
+            ffp->packet_buffering = 0;
+        }
+    }
+    av_log(NULL, AV_LOG_INFO, "low_delay : %d", is->low_delay);
 
     int video_stream_count = 0;
     int h264_stream_count = 0;
@@ -3365,7 +3409,12 @@ static int read_thread(void *arg)
         stream_component_open(ffp, st_index[AVMEDIA_TYPE_AUDIO]);
     } else {
         //音频不存在的时候，设置主时钟为视频时钟
-        ffp->av_sync_type = AV_SYNC_VIDEO_MASTER;
+        //这里如果设置了低延迟直播的话，最好用外部时钟，降低延迟
+        if(is->low_delay){
+            ffp->av_sync_type = AV_SYNC_EXTERNAL_CLOCK;
+        }else {
+            ffp->av_sync_type = AV_SYNC_VIDEO_MASTER;
+        }
         is->av_sync_type  = ffp->av_sync_type;
     }
 
@@ -3483,15 +3532,20 @@ static int read_thread(void *arg)
         }else if(clock == AV_SYNC_EXTERNAL_CLOCK){
             ffp->av_sync_type = AV_SYNC_EXTERNAL_CLOCK;
             is->av_sync_type  = ffp->av_sync_type;
+            av_log(NULL, AV_LOG_INFO, "外部时钟为主时钟");
         }
     }
 
+
+
     int64_t duration = 0;
-    long last_call_time = (long) av_gettime_relative();
+    //double start_time = 0;
+    //long last_call_time = (long) av_gettime_relative();
+    int loop_num = 0;
     for (;;) {
-        long currentTime = (long) av_gettime_relative();
-        av_log(NULL, AV_LOG_INFO, "a loop waste time : %f", (currentTime - last_call_time) / (double)1000);
-        last_call_time = currentTime;
+        //long currentTime = (long) av_gettime_relative();
+        //av_log(NULL, AV_LOG_INFO, "a loop waste time : %f", (currentTime - last_call_time) / (double)1000);
+        //last_call_time = currentTime;
         if (is->abort_request)
             break;
 #ifdef FFP_MERGE
@@ -3617,7 +3671,7 @@ static int read_thread(void *arg)
         }
 
         /**
-        * ffp->infinite_buffer 是一个标志，因为有可能网络非常好，dumexer解封装的速度大于渲染画面的速度，就会造成解码队列太多buffer了，这并不是一个很好的措施
+        * ffp->infinite_buffer 是一个标志，因为有可能网络非常好，demuxer 解封装的速度大于渲染画面的速度，就会造成解码队列太多buffer了，这并不是一个很好的措施
         * 所以如果该标志为0，那么可以计算 解码队列的buffer数量来决定是否继续解封装。
         *
         * 但是如果是实时流的话，需要设置为1，因为直播流最让人操心的就是网络速度问题，而不是渲染问题。
@@ -3681,9 +3735,9 @@ static int read_thread(void *arg)
             }
         }
         pkt->flags = 0;
-        long read_frame_start_time = (long) av_gettime_relative();
+        //long read_frame_start_time = (long) av_gettime_relative();
         ret = av_read_frame(ic, pkt);
-        av_log(NULL, AV_LOG_INFO, "read_frame waste : %f", ((long)av_gettime_relative() - read_frame_start_time)/(double) 1000);
+        //av_log(NULL, AV_LOG_INFO, "read_frame waste : %f", ((long)av_gettime_relative() - read_frame_start_time)/(double) 1000);
         if (ret < 0) {
             int pb_eof = 0;
             int pb_error = 0;
@@ -3778,26 +3832,67 @@ static int read_thread(void *arg)
             //找不到相关的流、或者不在播放范围内，丢弃
             av_packet_unref(pkt);
         }
-        if(ret >= 0){
-            if(duration == 0){
-                //初始化duration
-                duration = av_gettime_relative();
+
+        //low_delay 只需处理 音视频都存在的情况和音频存在的情况，如果只有视频流，那么不用处理，将交由外部时钟处理
+        if(is->low_delay){
+            // 先判断队列是否已经超出 最大约束时长，并且是关键帧，这个时候启动动画，对其进行强行删除。
+            if(is->max_cached_duration > 0 && ret >= 0 && (pkt->flags & AV_PKT_FLAG_KEY)){
+                //ffp_toggle_pause_animate(ffp, 1);
+                control_queue_duration(ffp, is);
+                //ffp_toggle_pause_animate(ffp, 0);
             }
-            int64_t currentPos = av_gettime_relative() - duration;
+
+            if(ret >= 0 && ic->streams[pkt->stream_index]->codec->codec_type == AVMEDIA_TYPE_AUDIO){
+                //超过3帧的话，直接加速，否则恢复正常速度
+                if(is->audioq.nb_packets >= 25 && ffp->pf_playback_rate < 1.1f) {
+                    ffp_set_playback_rate(ffp, 1.1f);
+                }
+
+
+                if(is->audioq.nb_packets < 25 && is->audioq.nb_packets > 6 && (ffp->pf_playback_rate < 1.05f || ffp->pf_playback_rate > 1.05f)){
+                    ffp_set_playback_rate(ffp, 1.05f);
+                }
+
+
+                if(is->audioq.nb_packets <= 2 && ffp->pf_playback_rate > 1.0f){
+                    ffp_set_playback_rate(ffp, 1.0f);
+                }
+            }
+        }
+/*
+
+        if(ret >= 0 && ic->streams[pkt->stream_index]->codec->codec_type == AVMEDIA_TYPE_VIDEO){
             AVRational time_base = ic->streams[pkt->stream_index]->time_base;
             double pts = av_q2d(time_base) * pkt->pts;
-            double delay = currentPos / 1000 - pts * 1000;
+            if(duration == 0 && pts > 0){
+                //初始化duration
+                duration = av_gettime_relative();
+                if(pts > 0.04){
+                    start_time = pts * 1000;
+                }
+            }
+            int64_t currentPos = av_gettime_relative() - duration;
+
+            double delay = currentPos / 1000 - pts * 1000 + start_time;
             if(pts > 0 && delay > 2000){
 
             }
-            av_log(NULL, AV_LOG_INFO, "av_frame_rate: num :%d, den:%d, pos :%f, nb_pkts : %d,current pos: %f,delay : %f, vq size :%d, aq size:%d",
+            av_log(NULL, AV_LOG_INFO, "av_frame_rate: num :%d, den:%d, pos :%f, nb_pkts : %d,current pos: %f,delay : %f, vq size :%d, aq size:%d, duration :%ld",
                     time_base.num, time_base.den, pts, is->videoq.nb_packets,(double)currentPos / 1000000, delay,
-                    frame_queue_nb_remaining(&is->pictq), frame_queue_nb_remaining(&is->sampq));
+                    frame_queue_nb_remaining(&is->pictq), frame_queue_nb_remaining(&is->sampq), pkt->duration);
+        }
+*/
+
+        loop_num++;
+        if(loop_num == 1000 || loop_num == 3000){
+            //模拟网络抖动
+            av_log(NULL, AV_LOG_INFO, "delay -- 模拟网络抖动");
+            SDL_Delay(6000);
         }
 
         //把 pkt 放进队列之后，检测到当前 pkt 是关键帧，那么进行 max_cached_duration 检测
         if(is->max_cached_duration > 0 && ret >= 0 && (pkt->flags & AV_PKT_FLAG_KEY)){
-            control_queue_duration(ffp, is);
+            //control_queue_duration(ffp, is);
         }
 
         //统计音频和视频流的 PakcetQueue 的数据 - duration、bytes、nb_pkts
@@ -3822,7 +3917,6 @@ static int read_thread(void *arg)
          *
          */
         if (ffp->packet_buffering) {
-            av_log(NULL, AV_LOG_DEBUG, "packet_buffering : true");
             //获取当前时间 -- 毫秒作为单位
             io_tick_counter = SDL_GetTickHR();
             if ((!ffp->first_video_frame_rendered && is->video_st) || (!ffp->first_audio_frame_rendered && is->audio_st)) {
@@ -3950,7 +4044,8 @@ void control_audio_queue_duration(FFPlayer *ffp, VideoState *is) {
     if (cached_duration > is->max_cached_duration) {
         // drop
         av_log(NULL, AV_LOG_INFO, "233 audio cached_duration = %lld, nb_packets = %d.\n", cached_duration, nb_packets);
-        drop_to_pts = is->audioq.last_pkt->pkt.pts - (duration / 2);
+        //丢弃到最后一帧
+        drop_to_pts = is->audioq.last_pkt->pkt.pts /*(duration / 2)*/;
         drop_queue_until_pts(&is->audioq, drop_to_pts);
     }
 
@@ -4941,6 +5036,29 @@ void ffp_toggle_buffering(FFPlayer *ffp, int start_buffering)
     SDL_UnlockMutex(ffp->is->play_mutex);
 }
 
+void ffp_toggle_pause_animate_1(FFPlayer *ffp, int animate_on)
+{
+    VideoState *is = ffp->is;
+    if (animate_on && !is->self_dropping_frame) {
+        av_log(ffp, AV_LOG_DEBUG, "ffp_toggle_buffering_l: start\n");
+        is->self_dropping_frame = 1;
+        stream_update_pause_l(ffp);
+        ffp_notify_msg2(ffp, FFP_MSG_BUFFERING_START, 0);
+    } else if (!animate_on && is->self_dropping_frame){
+        av_log(ffp, AV_LOG_DEBUG, "ffp_toggle_buffering_l: end\n");
+        is->self_dropping_frame = 0;
+        stream_update_pause_l(ffp);
+        ffp_notify_msg2(ffp, FFP_MSG_BUFFERING_END, 0);
+    }
+}
+
+void ffp_toggle_pause_animate(FFPlayer *ffp, int start_buffering){
+    SDL_LockMutex(ffp->is->play_mutex);
+    ffp_toggle_pause_animate_1(ffp, start_buffering);
+    SDL_UnlockMutex(ffp->is->play_mutex);
+}
+
+
 void ffp_track_statistic_l(FFPlayer *ffp, AVStream *st, PacketQueue *q, FFTrackCacheStatistic *cache)
 {
     assert(cache);
@@ -4990,6 +5108,8 @@ void ffp_check_buffering_l(FFPlayer *ffp)
         audio_time_base_valid = is->audio_st->time_base.den > 0 && is->audio_st->time_base.num > 0;
     if(is->video_st)
         video_time_base_valid = is->video_st->time_base.den > 0 && is->video_st->time_base.num > 0;
+
+    //av_log(NULL, AV_LOG_INFO, "ffp_check_buffering_1, video_time_base_valid : %d, hwm_in_ms :%d, hwn_in_bytes : %d", video_time_base_valid, hwm_in_ms, hwm_in_bytes);
 
     //肯定 > 0
     if (hwm_in_ms > 0) {
@@ -5053,6 +5173,8 @@ void ffp_check_buffering_l(FFPlayer *ffp)
         ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_BYTES_UPDATE, cached_size, hwm_in_bytes);
 #endif
     }
+
+    //av_log(NULL, AV_LOG_INFO, "cache percent : %d, buf_size_percent : %d", buf_time_percent, buf_size_percent);
 
     int buf_percent = -1;
     if (buf_time_percent >= 0) {

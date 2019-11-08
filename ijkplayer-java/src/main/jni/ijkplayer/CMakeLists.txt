@@ -41,3 +41,6 @@ target_link_libraries(ijkplayer
     log
     android
 )
+
+#复制 libffmpeg.so 库到 库目标输出目录
+add_custom_command(TARGET ijkplayer POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy ${ffmpeg_so_dir}/${ANDROID_ABI}/libijkffmpeg.so ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libijkffmpeg.so)

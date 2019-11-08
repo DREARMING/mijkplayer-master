@@ -421,6 +421,8 @@ typedef struct VideoState {
     volatile int initialized_decoder;
     int seek_buffering;
     int max_cached_duration;
+    int self_dropping_frame;
+    int low_delay;
 } VideoState;
 
 /* options specified by the user */

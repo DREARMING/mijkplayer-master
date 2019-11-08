@@ -43,6 +43,9 @@ static SDL_Class g_audiotrack_class = {
     .name = "AudioTrack",
 };
 
+/**
+ * 当 SDL_Aout 是 AudioTrack 模式时， opaque的实例是该结构体
+ */
 typedef struct SDL_Aout_Opaque {
     SDL_cond *wakeup_cond;
     SDL_mutex *wakeup_mutex;
@@ -81,40 +84,59 @@ static int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
     assert(atrack);
     assert(buffer);
 
+    //设置线程优先级
     SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);
 
+    //如果没有终止和暂停，就回调 java 层，调用 aduioTrack.start() 方法
     if (!opaque->abort_request && !opaque->pause_on)
         SDL_Android_AudioTrack_play(env, atrack);
 
+    /**
+     * 下面是播放的循环，直到终止播放，该过程中会通过各种条件状态来判断，从而响应音频播放过程中的操作
+     * 比如暂停、flush、音量的设置、速率的改变
+     */
     while (!opaque->abort_request) {
         SDL_LockMutex(opaque->wakeup_mutex);
+
+        //暂停的处理
         if (!opaque->abort_request && opaque->pause_on) {
             SDL_Android_AudioTrack_pause(env, atrack);
             while (!opaque->abort_request && opaque->pause_on) {
+                //直接回调java层，调用 audioTracker.pasue() 方法，等待 wakeup_cond 条件的唤醒，每隔1毫秒自动醒来做判断
                 SDL_CondWaitTimeout(opaque->wakeup_cond, opaque->wakeup_mutex, 1000);
             }
+            //暂停取消之后
             if (!opaque->abort_request && !opaque->pause_on) {
+                //如果设置了要执行flush，则调用java层的 audioTracker.flush() 清空上次缓存没有播放的 pcm 数据
                 if (opaque->need_flush) {
                     opaque->need_flush = 0;
                     SDL_Android_AudioTrack_flush(env, atrack);
                 }
+                //调用java层的 audioTracker.play() 继续播放
                 SDL_Android_AudioTrack_play(env, atrack);
             }
         }
+
+        //flush的判断
         if (opaque->need_flush) {
             opaque->need_flush = 0;
             SDL_Android_AudioTrack_flush(env, atrack);
         }
+
+        //声音的设置
         if (opaque->need_set_volume) {
             opaque->need_set_volume = 0;
             SDL_Android_AudioTrack_set_volume(env, atrack, opaque->left_volume, opaque->right_volume);
         }
+
+        //播放速率的改变
         if (opaque->speed_changed) {
             opaque->speed_changed = 0;
             SDL_Android_AudioTrack_setSpeed(env, atrack, opaque->speed);
         }
         SDL_UnlockMutex(opaque->wakeup_mutex);
 
+        //通过回调函数获取数据，并存在 buffer 中
         audio_cblk(userdata, buffer, copy_size);
         if (opaque->need_flush) {
             SDL_Android_AudioTrack_flush(env, atrack);
@@ -125,6 +147,8 @@ static int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
             opaque->need_flush = 0;
             SDL_Android_AudioTrack_flush(env, atrack);
         } else {
+            //调用 java层 audioTrack.write(buffer, offset, size), 将音频数据存放在 audioTrack 的播放队列中，那么就会自动播放音频了
+            // 该函数调用会block，直到把所有数据都 enqueue 到 audioTrack 的队列为止，所以 written 总是等于 copySize，除非出现了小问题
             int written = SDL_Android_AudioTrack_write(env, atrack, buffer, copy_size);
             if (written != copy_size) {
                 ALOGW("AudioTrack: not all data copied %d/%d", (int)written, (int)copy_size);
@@ -134,6 +158,7 @@ static int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
         // TODO: 1 if callback return -1 or 0
     }
 
+    //释放资源，包括java层的资源
     SDL_Android_AudioTrack_free(env, atrack);
     return 0;
 }

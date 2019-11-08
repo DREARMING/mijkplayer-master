@@ -33,6 +33,7 @@ android {
 
                 targets  "ijksdl",
                         "ijkplayer"
+                        'ijkffmpeg'
 
             }
         }
