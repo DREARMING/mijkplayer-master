@@ -28,6 +28,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.mvcoder.common.log.Log;
+
 import tv.danmaku.ijk.media.example.R;
 import tv.danmaku.ijk.media.example.activities.RecentMediaActivity;
 import tv.danmaku.ijk.media.example.activities.SampleMediaActivity;
@@ -46,14 +48,14 @@ public class AppActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE)
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.READ_EXTERNAL_STORAGE)) {
                 // TODO: show explanation
             } else {
                 ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
                         MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
             }
         }
@@ -100,5 +102,12 @@ public class AppActivity extends AppCompatActivity {
             return show;
 
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.appenderFlush(true);
+        Log.appenderClose();
     }
 }

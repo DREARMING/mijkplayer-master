@@ -1198,6 +1198,9 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
     IJK_FIND_JAVA_CLASS(env, g_clazz.clazz, JNI_CLASS_IJKPLAYER);
     (*env)->RegisterNatives(env, g_clazz.clazz, g_methods, NELEM(g_methods) );
 
+    //find clog class
+   // find_clog_class(env);
+
     ijkmp_global_init();
     ijkmp_global_set_inject_callback(inject_callback);
 

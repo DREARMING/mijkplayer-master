@@ -30,6 +30,8 @@
 #include "ijksdl_codec_android_mediaformat_java.h"
 #include "ijksdl_codec_android_mediacodec_java.h"
 
+#include "./../log/clog.h"
+
 static JavaVM *g_jvm;
 
 static pthread_key_t g_thread_key;
@@ -208,6 +210,9 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 
     retval = J4A_LoadAll__catchAll(env);
     JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
+
+    //加载日志类
+    find_clog_class(env);
 
     return JNI_VERSION_1_4;
 }

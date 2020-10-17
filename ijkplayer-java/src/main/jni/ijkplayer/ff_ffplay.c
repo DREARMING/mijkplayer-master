@@ -337,8 +337,14 @@ static int packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket
 {
     assert(finished);
     //如果不缓冲的话，堵塞获取 pkt
-    if (!ffp->packet_buffering)
-        return packet_queue_get(q, pkt, 1, serial);
+    if (!ffp->packet_buffering) {
+        int ret = packet_queue_get(q, pkt, 1, serial);
+        if(ret < 0){
+            java_log(NULL, JAVA_LOG_I, "ffp->packet_buffering == 0 and get fail because queue->abort : %d", q->abort_request);
+        }
+        return ret;
+    }
+
 
     //缓冲的时候
     while (1) {
@@ -575,8 +581,10 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
 
         if (d->queue->serial == d->pkt_serial) {
             do {
-                if (d->queue->abort_request)
+                if (d->queue->abort_request) {
+                    java_log(NULL, JAVA_LOG_W, "abort_request");
                     return -1;
+                }
 
                 switch (d->avctx->codec_type) {
                     case AVMEDIA_TYPE_VIDEO:
@@ -602,6 +610,8 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
                                 d->next_pts = frame->pts + frame->nb_samples;
                                 d->next_pts_tb = tb;
                             }
+                        }else if(ret != AVERROR(EAGAIN)){
+                            java_log(NULL, JAVA_LOG_E, "avcodec_receive_frame error, ret:%d", ret);
                         }
                         break;
                     default:
@@ -610,6 +620,7 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
                 if (ret == AVERROR_EOF) {
                     d->finished = d->pkt_serial;
                     avcodec_flush_buffers(d->avctx);
+                    java_log(NULL, JAVA_LOG_W, "ret == AVERROR_EOF");
                     return 0;
                 }
                 if (ret >= 0)
@@ -624,8 +635,11 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
                 av_packet_move_ref(&pkt, &d->pkt);
                 d->packet_pending = 0;
             } else {
-                if (packet_queue_get_or_buffering(ffp, d->queue, &pkt, &d->pkt_serial, &d->finished) < 0)
+                if (packet_queue_get_or_buffering(ffp, d->queue, &pkt, &d->pkt_serial, &d->finished) < 0){
+                    java_log(NULL, JAVA_LOG_E, "packet_queue_get_or_buffering error");
                     return -1;
+                }
+
             }
         } while (d->queue->serial != d->pkt_serial);
 
@@ -650,6 +664,7 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
             } else {
                 if (avcodec_send_packet(d->avctx, &pkt) == AVERROR(EAGAIN)) {
                     av_log(d->avctx, AV_LOG_ERROR, "Receive_frame and send_packet both returned EAGAIN, which is an API violation.\n");
+                    java_log(NULL, JAVA_LOG_W, "Receive_frame and send_packet both returned EAGAIN, which is an API violation.");
                     d->packet_pending = 1;
                     av_packet_move_ref(&d->pkt, &pkt);
                 }
@@ -999,6 +1014,7 @@ static void stream_component_close(FFPlayer *ffp, int stream_index)
 
 static void stream_close(FFPlayer *ffp)
 {
+    java_log(NULL, JAVA_LOG_I, "stream_close, may be close play activity");
     VideoState *is = ffp->is;
     /* XXX: use a special url_shutdown call to abort parse cleanly */
     is->abort_request = 1;
@@ -1733,9 +1749,11 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame)
     int got_picture;
 
     ffp_video_statistic_l(ffp);
+    int64_t start_time = av_gettime_relative();
     if ((got_picture = decoder_decode_frame(ffp, &is->viddec, frame, NULL)) < 0)
         return -1;
-
+    int64_t endTime = av_gettime_relative();
+    ALOGD("decode a frame wast time : %lld, pk numbers : %d", (endTime - start_time), is->videoq.nb_packets);
     if (got_picture) {
         double dpts = NAN;
 
@@ -1754,6 +1772,9 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame)
                     is->videoq.nb_packets) {
                     is->frame_drops_early++;
                     is->continuous_frame_drops_early++;
+                    //framedrop 设置1，则每次最多丢一帧，然后就渲染。
+                    //设置frampdrop 的大小可以连续丢帧，但是问题是会比较卡
+                    //这里没有判断是否是关键帧的原因是，解码才需要关键帧，渲染是不需要的
                     if (is->continuous_frame_drops_early > ffp->framedrop) {
                         is->continuous_frame_drops_early = 0;
                     } else {
@@ -1761,6 +1782,7 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame)
                         ffp->stat.drop_frame_rate = (float)(ffp->stat.drop_frame_count) / (float)(ffp->stat.decode_frame_count);
                         av_frame_unref(frame);
                         got_picture = 0;
+                        ALOGD("drop a frame");
                     }
                 }
             }
@@ -2040,8 +2062,10 @@ static int audio_thread(void *arg)
 
     do {
         ffp_audio_statistic_l(ffp);
-        if ((got_frame = decoder_decode_frame(ffp, &is->auddec, frame, NULL)) < 0)
+        if ((got_frame = decoder_decode_frame(ffp, &is->auddec, frame, NULL)) < 0){
+            java_log(NULL, JAVA_LOG_E, "call decoder_decode_frame mtdhod fail! , ret : %d", got_frame);
             goto the_end;
+        }
 
         if (got_frame) {
                 tb = (AVRational){1, frame->sample_rate};
@@ -2359,7 +2383,10 @@ static int ffplay_video_thread(void *arg)
 #endif
             duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
             pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
+            int64_t  start_time_2 = av_gettime_relative();
             ret = queue_picture(ffp, frame, pts, duration, frame->pkt_pos, is->viddec.pkt_serial);
+            int64_t  end_time_2 = av_gettime_relative();
+            ALOGD("waste time for queue_picture : %lld", (end_time_2 - start_time_2));
             av_frame_unref(frame);
 #if CONFIG_AVFILTER
         }
@@ -2668,6 +2695,7 @@ reload:
     }
 #endif
     if (!is->auddec.first_frame_decoded) {
+        java_log(NULL, JAVA_LOG_I, "avcodec/Audio: first frame decoded");
         ALOGD("avcodec/Audio: first frame decoded\n");
         ffp_notify_msg1(ffp, FFP_MSG_AUDIO_DECODED_START);
         is->auddec.first_frame_decoded_time = SDL_GetTickHR();
@@ -2861,6 +2889,16 @@ static int audio_open(FFPlayer *opaque, int64_t wanted_channel_layout, int wante
     return spec.size;
 }
 
+static void ffp_show_dict(FFPlayer *ffp, const char *tag, AVDictionary *dict)
+{
+    AVDictionaryEntry *t = NULL;
+
+    while ((t = av_dict_get(dict, "", t, AV_DICT_IGNORE_SUFFIX))) {
+        av_log(ffp, AV_LOG_INFO, "%-*s: %-*s = %s\n", 12, tag, 28, t->key, t->value);
+        java_log(NULL, JAVA_LOG_I,"%-*s: %-*s = %s\n", 12, tag, 28, t->key, t->value);
+    }
+}
+
 /* open a given stream. Return 0 if OK */
 static int stream_component_open(FFPlayer *ffp, int stream_index)
 {
@@ -2907,6 +2945,23 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     }
 
     avctx->codec_id = codec->id;
+
+    if(codec->type == AVMEDIA_TYPE_AUDIO){
+        java_log(NULL, JAVA_LOG_I, "audio codec name : %s, %s", avcodec_get_name(avctx->codec_id), codec->long_name);
+
+        if(codec->priv_class) {
+            java_log(NULL, JAVA_LOG_I, "audio codec pri_class :%s", codec->priv_class->class_name);
+        }
+
+        if(ic->streams[stream_index]->metadata){
+            ffp_show_dict(ffp, "audio Stream meta info", ic->streams[stream_index]->metadata);
+        }
+
+    } else{
+        java_log(NULL, JAVA_LOG_I, "video codec name : %s", avcodec_get_name(avctx->codec_id));
+    }
+
+
     if(stream_lowres > av_codec_get_max_lowres(codec)){
         av_log(avctx, AV_LOG_WARNING, "The maximum value for lowres supported by the decoder is %d\n",
                 av_codec_get_max_lowres(codec));
@@ -2973,8 +3028,13 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
 #endif
 
         /* prepare audio output */
-        if ((ret = audio_open(ffp, channel_layout, nb_channels, sample_rate, &is->audio_tgt)) < 0)
+        if ((ret = audio_open(ffp, channel_layout, nb_channels, sample_rate, &is->audio_tgt)) < 0){
+            java_log(NULL, JAVA_LOG_I, "audio  stream open fail");
             goto fail;
+        }else{
+            java_log(NULL, JAVA_LOG_I, "audio open success, sample_rate : %d, nb_channels : %d", sample_rate, nb_channels);
+        }
+
         ffp_set_audio_codec_info(ffp, AVCODEC_MODULE_NAME, avcodec_get_name(avctx->codec_id));
         is->audio_hw_buf_size = ret;
         is->audio_src = is->audio_tgt;
@@ -2990,6 +3050,10 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
 
         is->audio_stream = stream_index;
         is->audio_st = ic->streams[stream_index];
+
+        AVRational tb_audio = av_stream_get_codec_timebase(is->audio_st);
+        java_log(NULL, JAVA_LOG_I, "audio timebase : %d:%d",  tb_audio.num, tb_audio.den);
+
 
         decoder_init(&is->auddec, avctx, &is->audioq, is->continue_read_thread);
         if ((is->ic->iformat->flags & (AVFMT_NOBINSEARCH | AVFMT_NOGENSEARCH | AVFMT_NO_BYTE_SEEK)) && !is->ic->iformat->read_seek) {
@@ -3317,6 +3381,8 @@ static int read_thread(void *arg)
         is->realtime = 1;
     }
 
+    java_log(NULL, JAVA_LOG_I, "url : %s", ic->filename);
+
     av_log(NULL, AV_LOG_INFO, "realtime : %d",is->realtime);
 
     //打印视频文件的 MetaData
@@ -3337,6 +3403,7 @@ static int read_thread(void *arg)
     int video_stream_count = 0;
     int h264_stream_count = 0;
     int first_h264_stream = -1;
+    int audio_stream_count = 0;
     for (i = 0; i < ic->nb_streams; i++) {
         AVStream *st = ic->streams[i];
         enum AVMediaType type = st->codecpar->codec_type;
@@ -3360,8 +3427,13 @@ static int read_thread(void *arg)
                 if (first_h264_stream < 0)
                     first_h264_stream = i;
             }
+        }else if(type == AVMEDIA_TYPE_AUDIO){
+            audio_stream_count++;
         }
     }
+
+    //确保有音频流
+    java_log(NULL,JAVA_LOG_I,"audio_stream_count : %d", audio_stream_count);
 
     //如果没有指定流，并且存在h264的视频流，这里优先选中h264
     if (video_stream_count > 1 && st_index[AVMEDIA_TYPE_VIDEO] < 0) {
@@ -3406,8 +3478,16 @@ static int read_thread(void *arg)
     //分别打开 音频、视频、字幕流，并且开始解码操作
     /* open the streams */
     if (st_index[AVMEDIA_TYPE_AUDIO] >= 0) {
+        java_log(NULL, JAVA_LOG_I, "find audio stream and decoder, stream count:%d, streamIndex : %d", audio_stream_count, st_index[AVMEDIA_TYPE_AUDIO]);
         stream_component_open(ffp, st_index[AVMEDIA_TYPE_AUDIO]);
     } else {
+        //音频不存在，打印一下是什么导致的
+        if(st_index[AVMEDIA_TYPE_AUDIO] == AVERROR_STREAM_NOT_FOUND){
+            java_log(NULL, JAVA_LOG_I, "can't find audio stream");
+        }else if(st_index[AVMEDIA_TYPE_AUDIO] == AVERROR_DECODER_NOT_FOUND){
+            java_log(NULL, JAVA_LOG_I, "audio decoder not find");
+        }
+
         //音频不存在的时候，设置主时钟为视频时钟
         //这里如果设置了低延迟直播的话，最好用外部时钟，降低延迟
         if(is->low_delay){
@@ -3859,40 +3939,12 @@ static int read_thread(void *arg)
                 }
             }
         }
-/*
-
-        if(ret >= 0 && ic->streams[pkt->stream_index]->codec->codec_type == AVMEDIA_TYPE_VIDEO){
-            AVRational time_base = ic->streams[pkt->stream_index]->time_base;
-            double pts = av_q2d(time_base) * pkt->pts;
-            if(duration == 0 && pts > 0){
-                //初始化duration
-                duration = av_gettime_relative();
-                if(pts > 0.04){
-                    start_time = pts * 1000;
-                }
-            }
-            int64_t currentPos = av_gettime_relative() - duration;
-
-            double delay = currentPos / 1000 - pts * 1000 + start_time;
-            if(pts > 0 && delay > 2000){
-
-            }
-            av_log(NULL, AV_LOG_INFO, "av_frame_rate: num :%d, den:%d, pos :%f, nb_pkts : %d,current pos: %f,delay : %f, vq size :%d, aq size:%d, duration :%ld",
-                    time_base.num, time_base.den, pts, is->videoq.nb_packets,(double)currentPos / 1000000, delay,
-                    frame_queue_nb_remaining(&is->pictq), frame_queue_nb_remaining(&is->sampq), pkt->duration);
-        }
-*/
 
         loop_num++;
         if(loop_num == 1000 || loop_num == 3000){
             //模拟网络抖动
-            av_log(NULL, AV_LOG_INFO, "delay -- 模拟网络抖动");
-            SDL_Delay(6000);
-        }
-
-        //把 pkt 放进队列之后，检测到当前 pkt 是关键帧，那么进行 max_cached_duration 检测
-        if(is->max_cached_duration > 0 && ret >= 0 && (pkt->flags & AV_PKT_FLAG_KEY)){
-            //control_queue_duration(ffp, is);
+           // av_log(NULL, AV_LOG_INFO, "delay -- 模拟网络抖动");
+            //SDL_Delay(6000);
         }
 
         //统计音频和视频流的 PakcetQueue 的数据 - duration、bytes、nb_pkts
@@ -4004,14 +4056,14 @@ void control_video_queue_duration(FFPlayer *ffp, VideoState *is) {
         if (is->videoq.first_pkt && is->videoq.last_pkt) {
             duration = is->videoq.last_pkt->pkt.pts - is->videoq.first_pkt->pkt.pts;
             cached_duration = duration * av_q2d(is->video_st->time_base) * 1000;
-            av_log(NULL, AV_LOG_INFO, "max_cached_duration : pts:%d, timebase :%f, %d/%d,time base vaild! duration : %d\n",
-                    duration,av_q2d(is->video_st->time_base),is->video_st->time_base.den, is->video_st->time_base.num, cached_duration);
+            /*av_log(NULL, AV_LOG_INFO, "max_cached_duration : pts:%d, timebase :%f, %d/%d,time base vaild! duration : %d\n",
+                    duration,av_q2d(is->video_st->time_base),is->video_st->time_base.den, is->video_st->time_base.num, cached_duration);*/
         }
     }
 
     if (cached_duration > is->max_cached_duration) {
         // drop
-        av_log(NULL, AV_LOG_INFO, "max_cached_duration video cached_duration = %lld, nb_packets = %d.\n", cached_duration, nb_packets);
+       /* av_log(NULL, AV_LOG_INFO, "max_cached_duration video cached_duration = %lld, nb_packets = %d.\n", cached_duration, nb_packets);*/
         drop_to_pts = is->videoq.last_pkt->pkt.pts - (duration / 2);  // 这里删掉一半，你也可以自己修改，依据设置进来的max_cached_duration大小
         drop_queue_until_pts(&is->videoq, drop_to_pts);
     }
@@ -4657,14 +4709,7 @@ int ffp_get_audio_codec_info(FFPlayer *ffp, char **codec_info)
     return 0;
 }
 
-static void ffp_show_dict(FFPlayer *ffp, const char *tag, AVDictionary *dict)
-{
-    AVDictionaryEntry *t = NULL;
 
-    while ((t = av_dict_get(dict, "", t, AV_DICT_IGNORE_SUFFIX))) {
-        av_log(ffp, AV_LOG_INFO, "%-*s: %-*s = %s\n", 12, tag, 28, t->key, t->value);
-    }
-}
 
 #define FFP_VERSION_MODULE_NAME_LENGTH 13
 static void ffp_show_version_str(FFPlayer *ffp, const char *module, const char *version)
@@ -4703,6 +4748,16 @@ int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
         }
     }
 
+    java_log(NULL, JAVA_LOG_I, "===== versions =====\n");
+    java_log(NULL, JAVA_LOG_I, "ijkplayer :%s", ijk_version_info());
+    java_log(NULL, JAVA_LOG_I, "FFmpeg :%s", av_version_info());
+    java_log(NULL, JAVA_LOG_I, "libavutil :%d", avutil_version());
+    java_log(NULL, JAVA_LOG_I, "libavcodec :%d", avcodec_version());
+    java_log(NULL, JAVA_LOG_I, "libavformat :%d", avformat_version());
+    java_log(NULL, JAVA_LOG_I, "libswscale :%d", swscale_version());
+    java_log(NULL, JAVA_LOG_I, "libswresample :%d", swresample_version());
+    java_log(NULL, JAVA_LOG_I, "===== options =====\n");
+
     av_log(NULL, AV_LOG_INFO, "===== versions =====\n");
     ffp_show_version_str(ffp, "ijkplayer",      ijk_version_info());
     ffp_show_version_str(ffp, "FFmpeg",         av_version_info());
@@ -4718,6 +4773,11 @@ int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
     ffp_show_dict(ffp, "sws-opts   ", ffp->sws_dict);
     ffp_show_dict(ffp, "swr-opts   ", ffp->swr_opts);
     av_log(NULL, AV_LOG_INFO, "===================\n");
+
+
+    java_log(NULL, JAVA_LOG_I, "================\n");
+
+
 
     av_opt_set_dict(ffp, &ffp->player_opts);
     if (!ffp->aout) {
@@ -4793,6 +4853,7 @@ int ffp_is_paused_l(FFPlayer *ffp)
 int ffp_stop_l(FFPlayer *ffp)
 {
     assert(ffp);
+    java_log(NULL, JAVA_LOG_I, "ffp_stop_1 cause ,may be release!");
     VideoState *is = ffp->is;
     if (is) {
         is->abort_request = 1;
@@ -5318,8 +5379,10 @@ int ffp_set_stream_selected(FFPlayer *ffp, int stream, int selected)
                     stream_component_close(ffp, is->video_stream);
                 break;
             case AVMEDIA_TYPE_AUDIO:
-                if (stream != is->audio_stream && is->audio_stream >= 0)
+                if (stream != is->audio_stream && is->audio_stream >= 0){
+                    java_log(NULL, AV_LOG_INFO, "set select stream, then close last Audio stream");
                     stream_component_close(ffp, is->audio_stream);
+                }
                 break;
             case AVMEDIA_TYPE_SUBTITLE:
                 if (stream != is->subtitle_stream && is->subtitle_stream >= 0)
@@ -5337,8 +5400,10 @@ int ffp_set_stream_selected(FFPlayer *ffp, int stream, int selected)
                     stream_component_close(ffp, is->video_stream);
                 break;
             case AVMEDIA_TYPE_AUDIO:
-                if (stream == is->audio_stream)
+                if (stream == is->audio_stream){
+                    java_log(NULL, AV_LOG_INFO, "un select stream == current stream, then close current Audio stream");
                     stream_component_close(ffp, is->audio_stream);
+                }
                 break;
             case AVMEDIA_TYPE_SUBTITLE:
                 if (stream == is->subtitle_stream)

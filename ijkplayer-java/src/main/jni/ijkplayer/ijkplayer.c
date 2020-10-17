@@ -303,6 +303,7 @@ void ijkmp_shutdown_l(IjkMediaPlayer *mp)
         ffp_stop_l(mp->ffplayer);
         ffp_wait_stop_l(mp->ffplayer);
     }
+    java_log(NULL, JAVA_LOG_I, "release method call");
     MPTRACE("ijkmp_shutdown_l()=void\n");
 }
 

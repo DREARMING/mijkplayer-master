@@ -28,6 +28,7 @@
 #include "ff_ffplay_def.h"
 #include "ff_fferror.h"
 #include "ff_ffmsg.h"
+#include "ijksdl/log/clog.h"
 
 void      ffp_global_init();
 void      ffp_global_uninit();

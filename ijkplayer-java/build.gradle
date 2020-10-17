@@ -26,6 +26,7 @@ android {
                         " -fstrict-aliasing -Werror=strict-aliasing" +
                         " -DANDROID -DNDEBUG"
 
+
                 arguments "-DANDROID_STL=stlport_static",
                         "-DANDROID_PIE=OFF",
                         "-DANDROID_ARM_NEON=TRUE",
@@ -38,7 +39,7 @@ android {
             }
         }
         ndk {
-            abiFilters 'x86','armeabi-v7a'
+            abiFilters 'x86','armeabi'
         }
     }
 
@@ -70,6 +71,10 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    if(rootProject.logEnable){
+        api project(':common')
+    }
 }
 
 apply from: new File(rootProject.projectDir, "tools/gradle-on-demand.gradle");

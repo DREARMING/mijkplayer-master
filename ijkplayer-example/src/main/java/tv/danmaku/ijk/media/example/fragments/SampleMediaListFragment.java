@@ -67,10 +67,15 @@ public class SampleMediaListFragment extends Fragment {
                 VideoActivity.intentTo(activity, url, name);
             }
         });
+        mAdapter.addItem("rtmp://192.168.1.17:1935/live/rtsp_admin:admin@192.168.1.165_live_av0", "1002课室声音 测试");
+        mAdapter.addItem("rtmp://192.168.1.101:1935/live/test", "设备测试");
         mAdapter.addItem("rtsp://192.168.1.164:554/live/av1", "RTSP 摄像头 测试");
         mAdapter.addItem("rtsp://192.168.1.164:554/live/av0", "RTSP 摄像头 高清测试");
         mAdapter.addItem("rtsp://192.168.1.131:554/test", "RTSP 视频 测试");
         mAdapter.addItem("rtmp://192.168.1.131:1935/live/test", "rtmp 测试");
+        mAdapter.addItem("http://192.168.1.131:8050/hls/test.m3u8", "hls 测试");
+        mAdapter.addItem("rtmp://192.168.1.138:1935/live/mylive2-206HD", "公司录播推流测试");
+        mAdapter.addItem("http://playertest.longtailvideo.com/adaptive/bipbop/gear4/prog_index.m3u8", "hls 测试 -- 网络");
         mAdapter.addItem("https://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4", "https 测试");
         mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8", "bipbop basic master playlist");
         mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear1/prog_index.m3u8", "bipbop basic 400x300 @ 232 kbps");

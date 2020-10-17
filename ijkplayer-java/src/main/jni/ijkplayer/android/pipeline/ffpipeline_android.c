@@ -84,8 +84,10 @@ static SDL_Aout *func_open_audio_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
     SDL_Aout *aout = NULL;
     if (ffp->opensles) {
         aout = SDL_AoutAndroid_CreateForOpenSLES();
+        java_log(NULL,JAVA_LOG_I, "audio player type : OpenSLES, success : %d", aout != NULL);
     } else {
         aout = SDL_AoutAndroid_CreateForAudioTrack();
+        java_log(NULL,JAVA_LOG_I, "audio player type : AudioTrack, success : %d", aout != NULL);
     }
     if (aout)
         SDL_AoutSetStereoVolume(aout, pipeline->opaque->left_volume, pipeline->opaque->right_volume);

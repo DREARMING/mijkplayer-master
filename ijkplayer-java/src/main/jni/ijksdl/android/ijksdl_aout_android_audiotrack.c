@@ -32,6 +32,7 @@
 #include "../ijksdl_aout_internal.h"
 #include "ijksdl_android_jni.h"
 #include "android_audiotrack.h"
+#include "../log/clog.h"
 
 #ifdef SDLTRACE
 #undef SDLTRACE
@@ -127,6 +128,7 @@ static int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
         if (opaque->need_set_volume) {
             opaque->need_set_volume = 0;
             SDL_Android_AudioTrack_set_volume(env, atrack, opaque->left_volume, opaque->right_volume);
+            java_log(NULL, JAVA_LOG_I, "AudioTrack set Volume, left : %f, right:%f", opaque->left_volume, opaque->right_volume);
         }
 
         //播放速率的改变
@@ -152,6 +154,7 @@ static int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
             int written = SDL_Android_AudioTrack_write(env, atrack, buffer, copy_size);
             if (written != copy_size) {
                 ALOGW("AudioTrack: not all data copied %d/%d", (int)written, (int)copy_size);
+                java_log(NULL, JAVA_LOG_I, "AudioTrack: not all data copied %d/%d", (int) written, (int) copy_size);
             }
         }
 
